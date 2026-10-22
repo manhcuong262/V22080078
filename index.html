@@ -191,8 +191,8 @@ if (params.get("name")) {
 }
 
 // Luôn đọc từ localStorage
-const id = params.get("id") || localStorage.getItem("employeeId") || "V25040057";
-const name = params.get("name") || localStorage.getItem("employeeName") || "Nguyễn Mạnh Cương";
+const id = params.get("id") || localStorage.getItem("employeeId") || "V22080078";
+const name = params.get("name") || localStorage.getItem("employeeName") || "Le Xuan Tuyen";
 
 document.title = id && name ? `${id} - ${name}` : "员工码";
 
@@ -239,67 +239,92 @@ if (!startTime) {
     );
 }
 
+// ===============================
+// RESET LÚC 08:00 VÀ 21:00 MỖI NGÀY
+// <1 giờ  => MM:SS
+// >=1 giờ => HH:MM:SS
+// ===============================
+
 function updateCountdown() {
 
-    // Số giây đã trôi qua kể từ lúc bắt đầu
-    const elapsedSeconds = Math.floor(
-        (Date.now() - Number(startTime)) / 1000
+    const now = new Date();
+
+    const today0800 = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        8, 0, 0
     );
 
-    // Thời gian hiện tại của bộ đếm
-    const totalSeconds =
-        (startSeconds + elapsedSeconds) % (24 * 3600);
-
-
-    // ===============================
-    // TÍNH GIỜ / PHÚT / GIÂY
-    // ===============================
-
-    const h = Math.floor(
-        totalSeconds / 3600
+    const today2100 = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        21, 0, 0
     );
 
-    const m = Math.floor(
-        (totalSeconds % 3600) / 60
+    let start;
+
+    // 08:00 → 20:59:59
+    if (now >= today0800 && now < today2100) {
+
+        start = today0800;
+
+    }
+    // 21:00 → 23:59:59
+    else if (now >= today2100) {
+
+        start = today2100;
+
+    }
+    // 00:00 → 07:59:59
+    else {
+
+        start = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate() - 1,
+            21, 0, 0
+        );
+
+    }
+
+    const diffSeconds = Math.floor(
+        (now.getTime() - start.getTime()) / 1000
     );
 
-    const s = totalSeconds % 60;
+    const h = Math.floor(diffSeconds / 3600);
+    const m = Math.floor((diffSeconds % 3600) / 60);
+    const s = diffSeconds % 60;
 
+    let display;
 
-    // ===============================
-    // HIỂN THỊ
-    // DƯỚI 1 GIỜ  → MM:SS
-    // TỪ 1 GIỜ   → HH:MM:SS
-    // ===============================
+    if (h < 1) {
 
-    let displayTime;
-
-    if (h === 0) {
-
-        displayTime =
+        display =
             `${String(m).padStart(2, "0")}:` +
             `${String(s).padStart(2, "0")}`;
 
     } else {
 
-        displayTime =
+        display =
             `${String(h).padStart(2, "0")}:` +
             `${String(m).padStart(2, "0")}:` +
             `${String(s).padStart(2, "0")}`;
+
     }
 
-
-    // Đưa thời gian lên giao diện
-    document.getElementById("countdown").textContent =
-        displayTime;
+    document.getElementById("countdown").textContent = display;
 }
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
 
 
 // ===============================
 // CHẠY NGAY KHI MỞ APP
 // ===============================
-
-updateCountdown();
 
 
 // ===============================
